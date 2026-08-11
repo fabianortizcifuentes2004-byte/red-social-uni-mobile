@@ -17,6 +17,8 @@ function formatearFecha(iso) {
 export default function MensajesScreen({ navigation }) {
   const { usuario } = useAuth();
   const [busqueda, setBusqueda] = useState("");
+  const [filtroFacultad, setFiltroFacultad] = useState("");
+  const [filtroCarrera, setFiltroCarrera] = useState("");
   const [resultados, setResultados] = useState([]);
   const [conversaciones, setConversaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -36,21 +38,41 @@ export default function MensajesScreen({ navigation }) {
     }, [cargarConversaciones])
   );
 
-  async function buscar(texto) {
+  const buscando = busqueda.trim().length >= 2 || filtroFacultad.trim() || filtroCarrera.trim();
+
+  const buscar = useCallback(
+    async (texto, facultad, carrera) => {
+      if (texto.trim().length < 2 && !facultad.trim() && !carrera.trim()) {
+        setResultados([]);
+        return;
+      }
+      const { data } = await api.get("/users", {
+        params: { q: texto, facultad, carrera },
+      });
+      setResultados(data.filter((u) => u.id !== usuario.id));
+    },
+    [usuario.id]
+  );
+
+  function actualizarBusqueda(texto) {
     setBusqueda(texto);
-    if (texto.trim().length < 2) {
-      setResultados([]);
-      return;
-    }
-    const { data } = await api.get("/users", { params: { q: texto } });
-    setResultados(data.filter((u) => u.id !== usuario.id));
+    buscar(texto, filtroFacultad, filtroCarrera);
+  }
+
+  function actualizarFacultad(texto) {
+    setFiltroFacultad(texto);
+    buscar(busqueda, texto, filtroCarrera);
+  }
+
+  function actualizarCarrera(texto) {
+    setFiltroCarrera(texto);
+    buscar(busqueda, filtroFacultad, texto);
   }
 
   function irAConversacion(otroUsuarioId, nombreOtroUsuario) {
     navigation.navigate("Conversacion", { otroUsuarioId, nombreOtroUsuario });
   }
 
-  const buscando = busqueda.trim().length >= 2;
   const datos = buscando ? resultados : conversaciones;
 
   return (
@@ -61,8 +83,24 @@ export default function MensajesScreen({ navigation }) {
         placeholder="Buscar por nombre..."
         placeholderTextColor="#8B90A8"
         value={busqueda}
-        onChangeText={buscar}
+        onChangeText={actualizarBusqueda}
       />
+      <View style={styles.filaFiltros}>
+        <TextInput
+          style={[styles.input, styles.inputFiltro]}
+          placeholder="Facultad"
+          placeholderTextColor="#8B90A8"
+          value={filtroFacultad}
+          onChangeText={actualizarFacultad}
+        />
+        <TextInput
+          style={[styles.input, styles.inputFiltro]}
+          placeholder="Carrera"
+          placeholderTextColor="#8B90A8"
+          value={filtroCarrera}
+          onChangeText={actualizarCarrera}
+        />
+      </View>
 
       <FlatList
         data={datos}
@@ -73,7 +111,11 @@ export default function MensajesScreen({ navigation }) {
           return (
             <TouchableOpacity
               style={styles.fila}
-              onPress={() => irAConversacion(persona.id, persona.nombre_completo)}
+              onPress={() =>
+                buscando
+                  ? navigation.navigate("PerfilUsuario", { userId: persona.id })
+                  : irAConversacion(persona.id, persona.nombre_completo)
+              }
             >
               <View style={styles.avatar}>
                 <Text style={styles.avatarInicial}>{persona.nombre_completo.charAt(0)}</Text>
@@ -86,7 +128,10 @@ export default function MensajesScreen({ navigation }) {
                   )}
                 </View>
                 {buscando ? (
-                  <Text style={styles.rol}>{persona.rol === "docente" ? "Docente" : "Estudiante"}</Text>
+                  <Text style={styles.rol}>
+                    {persona.rol === "docente" ? "Docente" : "Estudiante"}
+                    {persona.carrera ? ` · ${persona.carrera}` : ""}
+                  </Text>
                 ) : (
                   <Text style={styles.ultimoMensaje} numberOfLines={1}>
                     {item.ultimo_mensaje}
@@ -132,6 +177,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     color: "#FFFFFF",
+  },
+  filaFiltros: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  inputFiltro: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 13,
   },
   fila: {
     flexDirection: "row",

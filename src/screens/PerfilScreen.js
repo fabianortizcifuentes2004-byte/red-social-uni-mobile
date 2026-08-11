@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import api, { resolverUrlImagen } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -10,6 +11,19 @@ export default function PerfilScreen() {
   const [carrera, setCarrera] = useState(usuario?.carrera || "");
   const [guardando, setGuardando] = useState(false);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [contadores, setContadores] = useState({ total_seguidores: 0, total_siguiendo: 0 });
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!usuario?.id) return;
+      api
+        .get(`/users/${usuario.id}`)
+        .then(({ data }) =>
+          setContadores({ total_seguidores: data.total_seguidores, total_siguiendo: data.total_siguiendo })
+        )
+        .catch(() => {});
+    }, [usuario?.id])
+  );
 
   async function guardarPerfil() {
     setGuardando(true);
@@ -66,6 +80,17 @@ export default function PerfilScreen() {
       <Text style={styles.nombre}>{usuario?.nombre_completo}</Text>
       <Text style={styles.correo}>{usuario?.correo}</Text>
       <Text style={styles.rol}>{usuario?.rol === "docente" ? "Docente" : "Estudiante"}</Text>
+
+      <View style={styles.filaContadores}>
+        <View style={styles.contador}>
+          <Text style={styles.contadorNumero}>{contadores.total_seguidores}</Text>
+          <Text style={styles.contadorEtiqueta}>Seguidores</Text>
+        </View>
+        <View style={styles.contador}>
+          <Text style={styles.contadorNumero}>{contadores.total_siguiendo}</Text>
+          <Text style={styles.contadorEtiqueta}>Siguiendo</Text>
+        </View>
+      </View>
 
       <Text style={styles.etiqueta}>Carrera / Facultad</Text>
       <TextInput style={styles.input} value={carrera} onChangeText={setCarrera} placeholderTextColor="#8B90A8" />
@@ -139,7 +164,25 @@ const styles = StyleSheet.create({
     color: "#8C95F6",
     fontSize: 13,
     marginTop: 4,
+  },
+  filaContadores: {
+    flexDirection: "row",
+    gap: 32,
+    marginTop: 18,
     marginBottom: 24,
+  },
+  contador: {
+    alignItems: "center",
+  },
+  contadorNumero: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  contadorEtiqueta: {
+    color: "#A9AEC9",
+    fontSize: 12,
+    marginTop: 2,
   },
   etiqueta: {
     color: "#A9AEC9",

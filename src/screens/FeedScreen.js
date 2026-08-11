@@ -135,6 +135,7 @@ export default function FeedScreen({ navigation }) {
             publicacion={item}
             onLike={darLike}
             onAbrir={(pub) => navigation.navigate("DetallePublicacion", { publicacionId: pub.id })}
+            onAbrirAutor={(usuarioId) => navigation.navigate("PerfilUsuario", { userId: usuarioId })}
           />
         )}
         refreshControl={<RefreshControl refreshing={cargando} onRefresh={cargarFeed} tintColor="#FFFFFF" />}

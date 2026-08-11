@@ -1,10 +1,11 @@
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import LoginScreen from "../screens/LoginScreen";
 import RegistroScreen from "../screens/RegistroScreen";
 import FeedScreen from "../screens/FeedScreen";
@@ -12,21 +13,12 @@ import DetallePublicacionScreen from "../screens/DetallePublicacionScreen";
 import MensajesScreen from "../screens/MensajesScreen";
 import ConversacionScreen from "../screens/ConversacionScreen";
 import PerfilScreen from "../screens/PerfilScreen";
+import PerfilUsuarioScreen from "../screens/PerfilUsuarioScreen";
+import AdminScreen from "../screens/AdminScreen";
 
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
-
-const temaOscuro = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    background: "#1B1F3B",
-    card: "#1B1F3B",
-    border: "#262B4F",
-    primary: "#4E5BF2",
-  },
-};
 
 function PilaAutenticacion() {
   return (
@@ -38,28 +30,32 @@ function PilaAutenticacion() {
 }
 
 function PestanasPrincipales() {
+  const { colores } = useTheme();
+  const { usuario } = useAuth();
   return (
     <Tabs.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: "#161A34", borderTopColor: "#262B4F" },
-        tabBarActiveTintColor: "#8C95F6",
-        tabBarInactiveTintColor: "#6C7099",
+        tabBarStyle: { backgroundColor: colores.tabBarFondo, borderTopColor: colores.superficie },
+        tabBarActiveTintColor: colores.acentoSecundario,
+        tabBarInactiveTintColor: colores.tabBarInactivo,
       }}
     >
       <Tabs.Screen name="Muro" component={FeedScreen} />
       <Tabs.Screen name="Mensajes" component={MensajesScreen} />
       <Tabs.Screen name="Perfil" component={PerfilScreen} />
+      {usuario?.rol === "admin" && <Tabs.Screen name="Admin" component={AdminScreen} />}
     </Tabs.Navigator>
   );
 }
 
 function PilaPrincipal() {
+  const { colores } = useTheme();
   return (
     <MainStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: "#1B1F3B" },
-        headerTintColor: "#FFFFFF",
+        headerStyle: { backgroundColor: colores.fondo },
+        headerTintColor: colores.texto,
         headerShadowVisible: false,
       }}
     >
@@ -70,23 +66,40 @@ function PilaPrincipal() {
         options={{ title: "Publicación" }}
       />
       <MainStack.Screen name="Conversacion" component={ConversacionScreen} />
+      <MainStack.Screen
+        name="PerfilUsuario"
+        component={PerfilUsuarioScreen}
+        options={{ title: "Perfil" }}
+      />
     </MainStack.Navigator>
   );
 }
 
 export default function Navegacion() {
   const { usuario, cargando } = useAuth();
+  const { colores, esOscuro } = useTheme();
+
+  const temaNavegacion = {
+    ...(esOscuro ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(esOscuro ? DarkTheme.colors : DefaultTheme.colors),
+      background: colores.fondo,
+      card: colores.fondo,
+      border: colores.superficie,
+      primary: colores.acento,
+    },
+  };
 
   if (cargando) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#1B1F3B", alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator color="#4E5BF2" size="large" />
+      <View style={{ flex: 1, backgroundColor: colores.fondo, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator color={colores.acento} size="large" />
       </View>
     );
   }
 
   return (
-    <NavigationContainer theme={temaOscuro}>
+    <NavigationContainer theme={temaNavegacion}>
       {usuario ? <PilaPrincipal /> : <PilaAutenticacion />}
     </NavigationContainer>
   );

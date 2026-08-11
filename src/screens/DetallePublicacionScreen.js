@@ -12,9 +12,11 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../api/client";
+import { useAuth } from "../context/AuthContext";
 
-export default function DetallePublicacionScreen({ route }) {
+export default function DetallePublicacionScreen({ route, navigation }) {
   const { publicacionId } = route.params;
+  const { usuario } = useAuth();
   const [comentarios, setComentarios] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -48,6 +50,24 @@ export default function DetallePublicacionScreen({ route }) {
     }
   }
 
+  function confirmarEliminarComentario(comentarioId) {
+    Alert.alert("Eliminar comentario", "¿Seguro que quieres eliminarlo?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await api.delete(`/posts/${publicacionId}/comentarios/${comentarioId}`);
+            cargarComentarios();
+          } catch (error) {
+            Alert.alert("Error", "No se pudo eliminar el comentario");
+          }
+        },
+      },
+    ]);
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.contenedor}
@@ -57,12 +77,26 @@ export default function DetallePublicacionScreen({ route }) {
         data={comentarios}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <View style={styles.comentario}>
-            <Text style={styles.autorComentario}>{item.autor}</Text>
-            <Text style={styles.textoComentario}>{item.contenido}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const puedeEliminar = item.usuario_id === usuario?.id || usuario?.rol === "admin";
+          return (
+            <View style={styles.comentario}>
+              <View style={styles.filaComentario}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("PerfilUsuario", { userId: item.usuario_id })}
+                >
+                  <Text style={styles.autorComentario}>{item.autor}</Text>
+                </TouchableOpacity>
+                {puedeEliminar && (
+                  <TouchableOpacity onPress={() => confirmarEliminarComentario(item.id)}>
+                    <Text style={styles.eliminarComentario}>Eliminar</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <Text style={styles.textoComentario}>{item.contenido}</Text>
+            </View>
+          );
+        }}
         ListEmptyComponent={<Text style={styles.vacio}>Sé el primero en comentar</Text>}
       />
 
@@ -93,11 +127,20 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
   },
+  filaComentario: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 3,
+  },
   autorComentario: {
     color: "#8C95F6",
     fontWeight: "600",
     fontSize: 13,
-    marginBottom: 3,
+  },
+  eliminarComentario: {
+    color: "#F26B6B",
+    fontSize: 12,
   },
   textoComentario: {
     color: "#E4E6F5",

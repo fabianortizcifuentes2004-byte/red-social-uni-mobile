@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { resolverUrlImagen } from "../api/client";
 
-export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
+export default function TarjetaPublicacion({ publicacion, onLike, onAbrir, onAbrirAutor }) {
   const esDocente = publicacion.rol_autor === "docente";
 
   return (
@@ -13,7 +13,11 @@ export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
         </View>
       )}
 
-      <View style={styles.encabezado}>
+      <TouchableOpacity
+        style={styles.encabezado}
+        onPress={() => onAbrirAutor(publicacion.usuario_id)}
+        hitSlop={{ top: 4, bottom: 4 }}
+      >
         {publicacion.foto_autor ? (
           <Image source={{ uri: resolverUrlImagen(publicacion.foto_autor) }} style={styles.avatarImagen} />
         ) : (
@@ -25,7 +29,7 @@ export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
           <Text style={styles.autor}>{publicacion.autor}</Text>
           <Text style={styles.rol}>{esDocente ? "Docente" : "Estudiante"}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <Text style={styles.contenido}>{publicacion.contenido}</Text>
 
