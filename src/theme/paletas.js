@@ -1,19 +1,33 @@
 export const paletaOscura = {
-  fondo: "#1B1F3B",
-  superficie: "#262B4F",
-  acento: "#4E5BF2",
-  acentoSecundario: "#8C95F6",
-  texto: "#FFFFFF",
-  textoSuave: "#E4E6F5",
-  textoSecundario: "#A9AEC9",
-  textoTerciario: "#8B90A8",
-  peligro: "#F26B6B",
-  docente: "#F2984E",
-  tabBarFondo: "#161A34",
-  tabBarInactivo: "#6C7099",
+  fondo: "#12142B",
+  superficie: "#1E2145",
+  borde: "#2A2E5C",
+  acento: "#5B6EF5",
+  acentoSecundario: "#9AA5FF",
+  texto: "#F5F6FF",
+  textoSuave: "#D8DAF0",
+  textoSecundario: "#A6ACD1",
+  textoTerciario: "#7B81A8",
+  peligro: "#FF6B6B",
+  exito: "#4ADE80",
+  docente: "#F5A35C",
+  tabBarFondo: "#0F1126",
+  tabBarInactivo: "#5B6088",
 };
 
-// TODO(Fase C — rediseño visual): paleta clara definitiva. Por ahora es un
-// alias exacto de la oscura para no afectar nada mientras se construyen las
-// pantallas nuevas de la Fase B.
-export const paletaClara = paletaOscura;
+export const paletaClara = {
+  fondo: "#F5F6FB",
+  superficie: "#FFFFFF",
+  borde: "#E4E6F5",
+  acento: "#4E5BF2",
+  acentoSecundario: "#3B4BDB",
+  texto: "#171933",
+  textoSuave: "#33365B",
+  textoSecundario: "#5C6088",
+  textoTerciario: "#8A8FB3",
+  peligro: "#E14F4F",
+  exito: "#16A34A",
+  docente: "#C97A2E",
+  tabBarFondo: "#FFFFFF",
+  tabBarInactivo: "#A0A4C4",
+};

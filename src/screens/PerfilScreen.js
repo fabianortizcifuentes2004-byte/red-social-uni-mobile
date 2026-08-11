@@ -4,9 +4,18 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import api, { resolverUrlImagen } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+
+const OPCIONES_APARIENCIA = [
+  { valor: "sistema", etiqueta: "Sistema" },
+  { valor: "oscuro", etiqueta: "Oscuro" },
+  { valor: "claro", etiqueta: "Claro" },
+];
 
 export default function PerfilScreen() {
   const { usuario, logout, actualizarUsuario } = useAuth();
+  const { colores, preferencia, cambiarPreferencia } = useTheme();
+  const estilos = crearEstilos(colores);
   const [biografia, setBiografia] = useState(usuario?.biografia || "");
   const [carrera, setCarrera] = useState(usuario?.carrera || "");
   const [guardando, setGuardando] = useState(false);
@@ -66,155 +75,201 @@ export default function PerfilScreen() {
   }
 
   return (
-    <View style={styles.contenedor}>
+    <View style={estilos.contenedor}>
       <TouchableOpacity onPress={cambiarFoto} disabled={subiendoFoto}>
         {usuario?.foto_url ? (
-          <Image source={{ uri: resolverUrlImagen(usuario.foto_url) }} style={styles.avatarImagen} />
+          <Image source={{ uri: resolverUrlImagen(usuario.foto_url) }} style={estilos.avatarImagen} />
         ) : (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarInicial}>{usuario?.nombre_completo?.charAt(0)}</Text>
+          <View style={estilos.avatar}>
+            <Text style={estilos.avatarInicial}>{usuario?.nombre_completo?.charAt(0)}</Text>
           </View>
         )}
-        <Text style={styles.cambiarFoto}>{subiendoFoto ? "Subiendo..." : "Cambiar foto"}</Text>
+        <Text style={estilos.cambiarFoto}>{subiendoFoto ? "Subiendo..." : "Cambiar foto"}</Text>
       </TouchableOpacity>
-      <Text style={styles.nombre}>{usuario?.nombre_completo}</Text>
-      <Text style={styles.correo}>{usuario?.correo}</Text>
-      <Text style={styles.rol}>{usuario?.rol === "docente" ? "Docente" : "Estudiante"}</Text>
+      <Text style={estilos.nombre}>{usuario?.nombre_completo}</Text>
+      <Text style={estilos.correo}>{usuario?.correo}</Text>
+      <Text style={estilos.rol}>{usuario?.rol === "docente" ? "Docente" : "Estudiante"}</Text>
 
-      <View style={styles.filaContadores}>
-        <View style={styles.contador}>
-          <Text style={styles.contadorNumero}>{contadores.total_seguidores}</Text>
-          <Text style={styles.contadorEtiqueta}>Seguidores</Text>
+      <View style={estilos.filaContadores}>
+        <View style={estilos.contador}>
+          <Text style={estilos.contadorNumero}>{contadores.total_seguidores}</Text>
+          <Text style={estilos.contadorEtiqueta}>Seguidores</Text>
         </View>
-        <View style={styles.contador}>
-          <Text style={styles.contadorNumero}>{contadores.total_siguiendo}</Text>
-          <Text style={styles.contadorEtiqueta}>Siguiendo</Text>
+        <View style={estilos.contador}>
+          <Text style={estilos.contadorNumero}>{contadores.total_siguiendo}</Text>
+          <Text style={estilos.contadorEtiqueta}>Siguiendo</Text>
         </View>
       </View>
 
-      <Text style={styles.etiqueta}>Carrera / Facultad</Text>
-      <TextInput style={styles.input} value={carrera} onChangeText={setCarrera} placeholderTextColor="#8B90A8" />
-
-      <Text style={styles.etiqueta}>Biografía</Text>
+      <Text style={estilos.etiqueta}>Carrera / Facultad</Text>
       <TextInput
-        style={[styles.input, { minHeight: 80, textAlignVertical: "top" }]}
+        style={estilos.input}
+        value={carrera}
+        onChangeText={setCarrera}
+        placeholderTextColor={colores.textoTerciario}
+      />
+
+      <Text style={estilos.etiqueta}>Biografía</Text>
+      <TextInput
+        style={[estilos.input, { minHeight: 80, textAlignVertical: "top" }]}
         value={biografia}
         onChangeText={setBiografia}
         multiline
         maxLength={280}
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
       />
 
-      <TouchableOpacity style={styles.boton} onPress={guardarPerfil} disabled={guardando}>
-        <Text style={styles.botonTexto}>{guardando ? "Guardando..." : "Guardar cambios"}</Text>
+      <TouchableOpacity style={estilos.boton} onPress={guardarPerfil} disabled={guardando}>
+        <Text style={estilos.botonTexto}>{guardando ? "Guardando..." : "Guardar cambios"}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.botonSalir} onPress={logout}>
-        <Text style={styles.botonSalirTexto}>Cerrar sesión</Text>
+      <Text style={estilos.etiqueta}>Apariencia</Text>
+      <View style={estilos.filaApariencia}>
+        {OPCIONES_APARIENCIA.map((opcion) => (
+          <TouchableOpacity
+            key={opcion.valor}
+            style={[estilos.chipApariencia, preferencia === opcion.valor && estilos.chipAparienciaActivo]}
+            onPress={() => cambiarPreferencia(opcion.valor)}
+          >
+            <Text style={estilos.chipAparienciaTexto}>{opcion.etiqueta}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <TouchableOpacity style={estilos.botonSalir} onPress={logout}>
+        <Text style={estilos.botonSalirTexto}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: "#1B1F3B",
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    alignItems: "center",
-  },
-  avatarImagen: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 6,
-  },
-  cambiarFoto: {
-    color: "#8C95F6",
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 14,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#4E5BF2",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
-  avatarInicial: {
-    color: "#FFFFFF",
-    fontSize: 32,
-    fontWeight: "700",
-  },
-  nombre: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  correo: {
-    color: "#A9AEC9",
-    fontSize: 13,
-    marginTop: 2,
-  },
-  rol: {
-    color: "#8C95F6",
-    fontSize: 13,
-    marginTop: 4,
-  },
-  filaContadores: {
-    flexDirection: "row",
-    gap: 32,
-    marginTop: 18,
-    marginBottom: 24,
-  },
-  contador: {
-    alignItems: "center",
-  },
-  contadorNumero: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  contadorEtiqueta: {
-    color: "#A9AEC9",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  etiqueta: {
-    color: "#A9AEC9",
-    alignSelf: "flex-start",
-    fontSize: 13,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: "#262B4F",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#FFFFFF",
-    width: "100%",
-    marginBottom: 18,
-  },
-  boton: {
-    backgroundColor: "#4E5BF2",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    width: "100%",
-  },
-  botonTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  botonSalir: {
-    marginTop: 16,
-  },
-  botonSalirTexto: {
-    color: "#F26B6B",
-    fontSize: 14,
-  },
-});
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    contenedor: {
+      flex: 1,
+      backgroundColor: colores.fondo,
+      paddingTop: 60,
+      paddingHorizontal: 24,
+      alignItems: "center",
+    },
+    avatarImagen: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      marginBottom: 6,
+    },
+    cambiarFoto: {
+      color: colores.acentoSecundario,
+      fontSize: 12,
+      textAlign: "center",
+      marginBottom: 14,
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colores.acento,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 6,
+    },
+    avatarInicial: {
+      color: "#FFFFFF",
+      fontSize: 32,
+      fontWeight: "700",
+    },
+    nombre: {
+      color: colores.texto,
+      fontSize: 20,
+      fontWeight: "700",
+    },
+    correo: {
+      color: colores.textoSecundario,
+      fontSize: 13,
+      marginTop: 2,
+    },
+    rol: {
+      color: colores.acentoSecundario,
+      fontSize: 13,
+      marginTop: 4,
+    },
+    filaContadores: {
+      flexDirection: "row",
+      gap: 32,
+      marginTop: 18,
+      marginBottom: 24,
+    },
+    contador: {
+      alignItems: "center",
+    },
+    contadorNumero: {
+      color: colores.texto,
+      fontSize: 17,
+      fontWeight: "700",
+    },
+    contadorEtiqueta: {
+      color: colores.textoSecundario,
+      fontSize: 12,
+      marginTop: 2,
+    },
+    etiqueta: {
+      color: colores.textoSecundario,
+      alignSelf: "flex-start",
+      fontSize: 13,
+      marginBottom: 6,
+    },
+    input: {
+      backgroundColor: colores.superficie,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      color: colores.texto,
+      width: "100%",
+      marginBottom: 18,
+    },
+    boton: {
+      backgroundColor: colores.acento,
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: "center",
+      width: "100%",
+      marginBottom: 24,
+    },
+    botonTexto: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+    },
+    filaApariencia: {
+      flexDirection: "row",
+      gap: 8,
+      width: "100%",
+    },
+    chipApariencia: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 10,
+      backgroundColor: colores.superficie,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      alignItems: "center",
+    },
+    chipAparienciaActivo: {
+      backgroundColor: colores.acento,
+      borderColor: colores.acento,
+    },
+    chipAparienciaTexto: {
+      color: colores.texto,
+      fontSize: 13,
+      fontWeight: "600",
+    },
+    botonSalir: {
+      marginTop: 20,
+    },
+    botonSalirTexto: {
+      color: colores.peligro,
+      fontSize: 14,
+    },
+  });
+}

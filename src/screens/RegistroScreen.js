@@ -9,9 +9,12 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function RegistroScreen({ navigation }) {
   const { registro } = useAuth();
+  const { colores } = useTheme();
+  const estilos = crearEstilos(colores);
   const [nombreCompleto, setNombreCompleto] = useState("");
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
@@ -36,137 +39,144 @@ export default function RegistroScreen({ navigation }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.contenedor}>
-      <Text style={styles.titulo}>Crear cuenta</Text>
-      <Text style={styles.subtitulo}>Usa tu correo institucional para registrarte</Text>
+    <ScrollView contentContainerStyle={estilos.contenedor}>
+      <Text style={estilos.titulo}>Crear cuenta</Text>
+      <Text style={estilos.subtitulo}>Usa tu correo institucional para registrarte</Text>
 
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="Nombre completo"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         value={nombreCompleto}
         onChangeText={setNombreCompleto}
       />
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="correo@sanjose.edu.co"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         autoCapitalize="none"
         keyboardType="email-address"
         value={correo}
         onChangeText={setCorreo}
       />
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="Contraseña"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="Facultad o carrera"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         value={facultad}
         onChangeText={setFacultad}
       />
 
-      <Text style={styles.etiqueta}>Soy:</Text>
-      <View style={styles.filaRoles}>
+      <Text style={estilos.etiqueta}>Soy:</Text>
+      <View style={estilos.filaRoles}>
         <TouchableOpacity
-          style={[styles.chipRol, rol === "estudiante" && styles.chipRolActivo]}
+          style={[estilos.chipRol, rol === "estudiante" && estilos.chipRolActivo]}
           onPress={() => setRol("estudiante")}
         >
-          <Text style={styles.chipTexto}>Estudiante</Text>
+          <Text style={estilos.chipTexto}>Estudiante</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.chipRol, rol === "docente" && styles.chipRolActivo]}
+          style={[estilos.chipRol, rol === "docente" && estilos.chipRolActivo]}
           onPress={() => setRol("docente")}
         >
-          <Text style={styles.chipTexto}>Docente</Text>
+          <Text style={estilos.chipTexto}>Docente</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.boton} onPress={manejarRegistro} disabled={enviando}>
-        <Text style={styles.botonTexto}>{enviando ? "Creando cuenta..." : "Crear cuenta"}</Text>
+      <TouchableOpacity style={estilos.boton} onPress={manejarRegistro} disabled={enviando}>
+        <Text style={estilos.botonTexto}>{enviando ? "Creando cuenta..." : "Crear cuenta"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.enlace}>Ya tengo cuenta, iniciar sesión</Text>
+        <Text style={estilos.enlace}>Ya tengo cuenta, iniciar sesión</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flexGrow: 1,
-    backgroundColor: "#1B1F3B",
-    justifyContent: "center",
-    paddingHorizontal: 28,
-    paddingVertical: 60,
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    marginBottom: 6,
-  },
-  subtitulo: {
-    fontSize: 14,
-    color: "#A9AEC9",
-    marginBottom: 28,
-  },
-  input: {
-    backgroundColor: "#262B4F",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: "#FFFFFF",
-    marginBottom: 14,
-    fontSize: 15,
-  },
-  etiqueta: {
-    color: "#A9AEC9",
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  filaRoles: {
-    flexDirection: "row",
-    marginBottom: 20,
-    gap: 10,
-  },
-  chipRol: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#262B4F",
-    alignItems: "center",
-  },
-  chipRolActivo: {
-    backgroundColor: "#4E5BF2",
-  },
-  chipTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  boton: {
-    backgroundColor: "#4E5BF2",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  botonTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  enlace: {
-    color: "#8C95F6",
-    textAlign: "center",
-    marginTop: 20,
-    fontSize: 14,
-  },
-});
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    contenedor: {
+      flexGrow: 1,
+      backgroundColor: colores.fondo,
+      justifyContent: "center",
+      paddingHorizontal: 28,
+      paddingVertical: 60,
+    },
+    titulo: {
+      fontSize: 28,
+      fontWeight: "700",
+      color: colores.texto,
+      marginBottom: 6,
+    },
+    subtitulo: {
+      fontSize: 14,
+      color: colores.textoSecundario,
+      marginBottom: 28,
+    },
+    input: {
+      backgroundColor: colores.superficie,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      color: colores.texto,
+      marginBottom: 14,
+      fontSize: 15,
+    },
+    etiqueta: {
+      color: colores.textoSecundario,
+      marginBottom: 8,
+      fontSize: 14,
+    },
+    filaRoles: {
+      flexDirection: "row",
+      marginBottom: 20,
+      gap: 10,
+    },
+    chipRol: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 10,
+      backgroundColor: colores.superficie,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      alignItems: "center",
+    },
+    chipRolActivo: {
+      backgroundColor: colores.acento,
+      borderColor: colores.acento,
+    },
+    chipTexto: {
+      color: colores.texto,
+      fontWeight: "600",
+    },
+    boton: {
+      backgroundColor: colores.acento,
+      borderRadius: 12,
+      paddingVertical: 15,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    botonTexto: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+      fontSize: 16,
+    },
+    enlace: {
+      color: colores.acentoSecundario,
+      textAlign: "center",
+      marginTop: 20,
+      fontSize: 14,
+    },
+  });
+}

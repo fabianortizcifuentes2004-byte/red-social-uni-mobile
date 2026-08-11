@@ -3,6 +3,9 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "r
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import Avatar from "../components/Avatar";
+import EstadoVacio from "../components/EstadoVacio";
 
 function formatearFecha(iso) {
   const fecha = new Date(iso);
@@ -16,6 +19,8 @@ function formatearFecha(iso) {
 
 export default function MensajesScreen({ navigation }) {
   const { usuario } = useAuth();
+  const { colores } = useTheme();
+  const estilos = crearEstilos(colores);
   const [busqueda, setBusqueda] = useState("");
   const [filtroFacultad, setFiltroFacultad] = useState("");
   const [filtroCarrera, setFiltroCarrera] = useState("");
@@ -38,7 +43,7 @@ export default function MensajesScreen({ navigation }) {
     }, [cargarConversaciones])
   );
 
-  const buscando = busqueda.trim().length >= 2 || filtroFacultad.trim() || filtroCarrera.trim();
+  const buscando = Boolean(busqueda.trim().length >= 2 || filtroFacultad.trim() || filtroCarrera.trim());
 
   const buscar = useCallback(
     async (texto, facultad, carrera) => {
@@ -76,27 +81,27 @@ export default function MensajesScreen({ navigation }) {
   const datos = buscando ? resultados : conversaciones;
 
   return (
-    <View style={styles.contenedor}>
-      <Text style={styles.titulo}>Mensajes</Text>
+    <View style={estilos.contenedor}>
+      <Text style={estilos.titulo}>Mensajes</Text>
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="Buscar por nombre..."
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         value={busqueda}
         onChangeText={actualizarBusqueda}
       />
-      <View style={styles.filaFiltros}>
+      <View style={estilos.filaFiltros}>
         <TextInput
-          style={[styles.input, styles.inputFiltro]}
+          style={[estilos.input, estilos.inputFiltro]}
           placeholder="Facultad"
-          placeholderTextColor="#8B90A8"
+          placeholderTextColor={colores.textoTerciario}
           value={filtroFacultad}
           onChangeText={actualizarFacultad}
         />
         <TextInput
-          style={[styles.input, styles.inputFiltro]}
+          style={[estilos.input, estilos.inputFiltro]}
           placeholder="Carrera"
-          placeholderTextColor="#8B90A8"
+          placeholderTextColor={colores.textoTerciario}
           value={filtroCarrera}
           onChangeText={actualizarCarrera}
         />
@@ -110,37 +115,35 @@ export default function MensajesScreen({ navigation }) {
           const persona = buscando ? item : item.usuario;
           return (
             <TouchableOpacity
-              style={styles.fila}
+              style={estilos.fila}
               onPress={() =>
                 buscando
                   ? navigation.navigate("PerfilUsuario", { userId: persona.id })
                   : irAConversacion(persona.id, persona.nombre_completo)
               }
             >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarInicial}>{persona.nombre_completo.charAt(0)}</Text>
-              </View>
-              <View style={styles.info}>
-                <View style={styles.filaSuperior}>
-                  <Text style={styles.nombre}>{persona.nombre_completo}</Text>
+              <Avatar fotoUrl={persona.foto_url} nombre={persona.nombre_completo} tamano={42} />
+              <View style={estilos.info}>
+                <View style={estilos.filaSuperior}>
+                  <Text style={estilos.nombre}>{persona.nombre_completo}</Text>
                   {!buscando && (
-                    <Text style={styles.fecha}>{formatearFecha(item.fecha_ultimo_mensaje)}</Text>
+                    <Text style={estilos.fecha}>{formatearFecha(item.fecha_ultimo_mensaje)}</Text>
                   )}
                 </View>
                 {buscando ? (
-                  <Text style={styles.rol}>
+                  <Text style={estilos.rol}>
                     {persona.rol === "docente" ? "Docente" : "Estudiante"}
                     {persona.carrera ? ` · ${persona.carrera}` : ""}
                   </Text>
                 ) : (
-                  <Text style={styles.ultimoMensaje} numberOfLines={1}>
+                  <Text style={estilos.ultimoMensaje} numberOfLines={1}>
                     {item.ultimo_mensaje}
                   </Text>
                 )}
               </View>
               {!buscando && item.no_leidos > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeTexto}>{item.no_leidos}</Text>
+                <View style={estilos.badge}>
+                  <Text style={estilos.badgeTexto}>{item.no_leidos}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -148,9 +151,10 @@ export default function MensajesScreen({ navigation }) {
         }}
         ListEmptyComponent={
           !cargando && (
-            <Text style={styles.vacio}>
-              {buscando ? "No se encontraron usuarios" : "Aún no tienes conversaciones"}
-            </Text>
+            <EstadoVacio
+              icono={buscando ? "search-outline" : "chatbubbles-outline"}
+              texto={buscando ? "No se encontraron usuarios" : "Aún no tienes conversaciones"}
+            />
           )
         }
       />
@@ -158,98 +162,85 @@ export default function MensajesScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: "#1B1F3B",
-    paddingTop: 55,
-    paddingHorizontal: 20,
-  },
-  titulo: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
-  input: {
-    backgroundColor: "#262B4F",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#FFFFFF",
-  },
-  filaFiltros: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
-  },
-  inputFiltro: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 13,
-  },
-  fila: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#4E5BF2",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  avatarInicial: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  info: {
-    flex: 1,
-  },
-  filaSuperior: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  nombre: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  rol: {
-    color: "#A9AEC9",
-    fontSize: 12,
-  },
-  ultimoMensaje: {
-    color: "#A9AEC9",
-    fontSize: 13,
-    marginTop: 2,
-  },
-  fecha: {
-    color: "#8B90A8",
-    fontSize: 11,
-  },
-  badge: {
-    backgroundColor: "#4E5BF2",
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 5,
-    marginLeft: 8,
-  },
-  badgeTexto: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  vacio: {
-    color: "#A9AEC9",
-    textAlign: "center",
-    marginTop: 30,
-  },
-});
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    contenedor: {
+      flex: 1,
+      backgroundColor: colores.fondo,
+      paddingTop: 55,
+      paddingHorizontal: 20,
+    },
+    titulo: {
+      color: colores.texto,
+      fontSize: 22,
+      fontWeight: "700",
+      marginBottom: 16,
+    },
+    input: {
+      backgroundColor: colores.superficie,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      color: colores.texto,
+    },
+    filaFiltros: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 8,
+    },
+    inputFiltro: {
+      flex: 1,
+      paddingVertical: 10,
+      fontSize: 13,
+    },
+    fila: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 12,
+    },
+    info: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    filaSuperior: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    nombre: {
+      color: colores.texto,
+      fontSize: 15,
+      fontWeight: "600",
+    },
+    rol: {
+      color: colores.textoSecundario,
+      fontSize: 12,
+    },
+    ultimoMensaje: {
+      color: colores.textoSecundario,
+      fontSize: 13,
+      marginTop: 2,
+    },
+    fecha: {
+      color: colores.textoTerciario,
+      fontSize: 11,
+    },
+    badge: {
+      backgroundColor: colores.acento,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 5,
+      marginLeft: 8,
+    },
+    badgeTexto: {
+      color: "#FFFFFF",
+      fontSize: 11,
+      fontWeight: "700",
+    },
+  });
+}

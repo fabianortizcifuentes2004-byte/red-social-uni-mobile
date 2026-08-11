@@ -10,9 +10,12 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
+  const { colores } = useTheme();
+  const estilos = crearEstilos(colores);
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -35,88 +38,88 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.contenedor}
+      style={estilos.contenedor}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Text style={styles.titulo}>Red Universitaria</Text>
-      <Text style={styles.subtitulo}>Inicia sesión con tu correo institucional</Text>
+      <Text style={estilos.titulo}>Red Universitaria</Text>
+      <Text style={estilos.subtitulo}>Inicia sesión con tu correo institucional</Text>
 
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="correo@sanjose.edu.co"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         autoCapitalize="none"
         keyboardType="email-address"
         value={correo}
         onChangeText={setCorreo}
       />
       <TextInput
-        style={styles.input}
+        style={estilos.input}
         placeholder="Contraseña"
-        placeholderTextColor="#8B90A8"
+        placeholderTextColor={colores.textoTerciario}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity
-        style={styles.boton}
-        onPress={manejarLogin}
-        disabled={enviando}
-      >
-        <Text style={styles.botonTexto}>{enviando ? "Ingresando..." : "Ingresar"}</Text>
+      <TouchableOpacity style={estilos.boton} onPress={manejarLogin} disabled={enviando}>
+        <Text style={estilos.botonTexto}>{enviando ? "Ingresando..." : "Ingresar"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Registro")}>
-        <Text style={styles.enlace}>¿No tienes cuenta? Regístrate</Text>
+        <Text style={estilos.enlace}>¿No tienes cuenta? Regístrate</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: "#1B1F3B",
-    justifyContent: "center",
-    paddingHorizontal: 28,
-  },
-  titulo: {
-    fontSize: 30,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    marginBottom: 6,
-  },
-  subtitulo: {
-    fontSize: 15,
-    color: "#A9AEC9",
-    marginBottom: 32,
-  },
-  input: {
-    backgroundColor: "#262B4F",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: "#FFFFFF",
-    marginBottom: 14,
-    fontSize: 15,
-  },
-  boton: {
-    backgroundColor: "#4E5BF2",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  botonTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  enlace: {
-    color: "#8C95F6",
-    textAlign: "center",
-    marginTop: 20,
-    fontSize: 14,
-  },
-});
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    contenedor: {
+      flex: 1,
+      backgroundColor: colores.fondo,
+      justifyContent: "center",
+      paddingHorizontal: 28,
+    },
+    titulo: {
+      fontSize: 30,
+      fontWeight: "700",
+      color: colores.texto,
+      marginBottom: 6,
+    },
+    subtitulo: {
+      fontSize: 15,
+      color: colores.textoSecundario,
+      marginBottom: 32,
+    },
+    input: {
+      backgroundColor: colores.superficie,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      color: colores.texto,
+      marginBottom: 14,
+      fontSize: 15,
+    },
+    boton: {
+      backgroundColor: colores.acento,
+      borderRadius: 12,
+      paddingVertical: 15,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    botonTexto: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+      fontSize: 16,
+    },
+    enlace: {
+      color: colores.acentoSecundario,
+      textAlign: "center",
+      marginTop: 20,
+      fontSize: 14,
+    },
+  });
+}

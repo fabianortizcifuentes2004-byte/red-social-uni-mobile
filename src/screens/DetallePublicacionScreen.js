@@ -11,12 +11,17 @@ import {
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import EstadoVacio from "../components/EstadoVacio";
 
 export default function DetallePublicacionScreen({ route, navigation }) {
   const { publicacionId } = route.params;
   const { usuario } = useAuth();
+  const { colores } = useTheme();
+  const estilos = crearEstilos(colores);
   const [comentarios, setComentarios] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -70,110 +75,104 @@ export default function DetallePublicacionScreen({ route, navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.contenedor}
+      style={estilos.contenedor}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <FlatList
         data={comentarios}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, flexGrow: 1 }}
         renderItem={({ item }) => {
           const puedeEliminar = item.usuario_id === usuario?.id || usuario?.rol === "admin";
           return (
-            <View style={styles.comentario}>
-              <View style={styles.filaComentario}>
+            <View style={estilos.comentario}>
+              <View style={estilos.filaComentario}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("PerfilUsuario", { userId: item.usuario_id })}
                 >
-                  <Text style={styles.autorComentario}>{item.autor}</Text>
+                  <Text style={estilos.autorComentario}>{item.autor}</Text>
                 </TouchableOpacity>
                 {puedeEliminar && (
                   <TouchableOpacity onPress={() => confirmarEliminarComentario(item.id)}>
-                    <Text style={styles.eliminarComentario}>Eliminar</Text>
+                    <Ionicons name="trash-outline" size={15} color={colores.peligro} />
                   </TouchableOpacity>
                 )}
               </View>
-              <Text style={styles.textoComentario}>{item.contenido}</Text>
+              <Text style={estilos.textoComentario}>{item.contenido}</Text>
             </View>
           );
         }}
-        ListEmptyComponent={<Text style={styles.vacio}>Sé el primero en comentar</Text>}
+        ListEmptyComponent={<EstadoVacio icono="chatbubble-ellipses-outline" texto="Sé el primero en comentar" />}
       />
 
-      <View style={styles.cajaComentar}>
+      <View style={estilos.cajaComentar}>
         <TextInput
-          style={styles.input}
+          style={estilos.input}
           placeholder="Escribe un comentario..."
-          placeholderTextColor="#8B90A8"
+          placeholderTextColor={colores.textoTerciario}
           value={nuevoComentario}
           onChangeText={setNuevoComentario}
         />
-        <TouchableOpacity style={styles.boton} onPress={enviarComentario} disabled={enviando}>
-          <Text style={styles.botonTexto}>Enviar</Text>
+        <TouchableOpacity style={estilos.boton} onPress={enviarComentario} disabled={enviando}>
+          <Ionicons name="send" size={16} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: "#1B1F3B",
-  },
-  comentario: {
-    backgroundColor: "#262B4F",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  filaComentario: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 3,
-  },
-  autorComentario: {
-    color: "#8C95F6",
-    fontWeight: "600",
-    fontSize: 13,
-  },
-  eliminarComentario: {
-    color: "#F26B6B",
-    fontSize: 12,
-  },
-  textoComentario: {
-    color: "#E4E6F5",
-    fontSize: 14,
-  },
-  vacio: {
-    color: "#A9AEC9",
-    textAlign: "center",
-    marginTop: 30,
-  },
-  cajaComentar: {
-    flexDirection: "row",
-    padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#262B4F",
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "#262B4F",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    color: "#FFFFFF",
-  },
-  boton: {
-    backgroundColor: "#4E5BF2",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    justifyContent: "center",
-  },
-  botonTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-});
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    contenedor: {
+      flex: 1,
+      backgroundColor: colores.fondo,
+    },
+    comentario: {
+      backgroundColor: colores.superficie,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 10,
+    },
+    filaComentario: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 3,
+    },
+    autorComentario: {
+      color: colores.acentoSecundario,
+      fontWeight: "600",
+      fontSize: 13,
+    },
+    textoComentario: {
+      color: colores.textoSuave,
+      fontSize: 14,
+    },
+    cajaComentar: {
+      flexDirection: "row",
+      padding: 12,
+      borderTopWidth: 1,
+      borderTopColor: colores.borde,
+      gap: 8,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colores.superficie,
+      borderWidth: 1,
+      borderColor: colores.borde,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      color: colores.texto,
+    },
+    boton: {
+      backgroundColor: colores.acento,
+      borderRadius: 10,
+      paddingHorizontal: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
+}

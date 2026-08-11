@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from "react-native";
 import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -29,17 +30,27 @@ function PilaAutenticacion() {
   );
 }
 
+const ICONOS_TAB = {
+  Muro: "newspaper-outline",
+  Mensajes: "chatbubbles-outline",
+  Perfil: "person-outline",
+  Admin: "shield-checkmark-outline",
+};
+
 function PestanasPrincipales() {
   const { colores } = useTheme();
   const { usuario } = useAuth();
   return (
     <Tabs.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: { backgroundColor: colores.tabBarFondo, borderTopColor: colores.superficie },
         tabBarActiveTintColor: colores.acentoSecundario,
         tabBarInactiveTintColor: colores.tabBarInactivo,
-      }}
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name={ICONOS_TAB[route.name]} color={color} size={size} />
+        ),
+      })}
     >
       <Tabs.Screen name="Muro" component={FeedScreen} />
       <Tabs.Screen name="Mensajes" component={MensajesScreen} />
