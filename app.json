@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/logo-usanjose.jpg",
     "splash": {
+      "image": "./assets/logo-usanjose.jpg",
+      "resizeMode": "contain",
       "backgroundColor": "#1B1F3B"
     },
     "assetBundlePatterns": ["**/*"],
@@ -14,6 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo-usanjose.jpg",
         "backgroundColor": "#1B1F3B"
       }
     },

@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Image,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -41,6 +42,7 @@ export default function LoginScreen({ navigation }) {
       style={estilos.contenedor}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <Image source={require("../../assets/logo-usanjose.jpg")} style={estilos.logo} />
       <Text style={estilos.titulo}>Red Universitaria</Text>
       <Text style={estilos.subtitulo}>Inicia sesión con tu correo institucional</Text>
 
@@ -81,16 +83,25 @@ function crearEstilos(colores) {
       justifyContent: "center",
       paddingHorizontal: 28,
     },
+    logo: {
+      width: 84,
+      height: 84,
+      borderRadius: 18,
+      alignSelf: "center",
+      marginBottom: 20,
+    },
     titulo: {
       fontSize: 30,
       fontWeight: "700",
       color: colores.texto,
       marginBottom: 6,
+      textAlign: "center",
     },
     subtitulo: {
       fontSize: 15,
       color: colores.textoSecundario,
       marginBottom: 32,
+      textAlign: "center",
     },
     input: {
       backgroundColor: colores.superficie,

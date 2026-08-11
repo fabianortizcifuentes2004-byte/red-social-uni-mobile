@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Image,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -40,6 +41,7 @@ export default function RegistroScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={estilos.contenedor}>
+      <Image source={require("../../assets/logo-usanjose.jpg")} style={estilos.logo} />
       <Text style={estilos.titulo}>Crear cuenta</Text>
       <Text style={estilos.subtitulo}>Usa tu correo institucional para registrarte</Text>
 
@@ -111,16 +113,25 @@ function crearEstilos(colores) {
       paddingHorizontal: 28,
       paddingVertical: 60,
     },
+    logo: {
+      width: 72,
+      height: 72,
+      borderRadius: 16,
+      alignSelf: "center",
+      marginBottom: 16,
+    },
     titulo: {
       fontSize: 28,
       fontWeight: "700",
       color: colores.texto,
       marginBottom: 6,
+      textAlign: "center",
     },
     subtitulo: {
       fontSize: 14,
       color: colores.textoSecundario,
       marginBottom: 28,
+      textAlign: "center",
     },
     input: {
       backgroundColor: colores.superficie,
