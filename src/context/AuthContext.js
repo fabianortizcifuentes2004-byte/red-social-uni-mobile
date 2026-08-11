@@ -42,8 +42,14 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }
 
+  async function actualizarUsuario(datosParciales) {
+    const usuarioActualizado = { ...usuario, ...datosParciales };
+    await AsyncStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
+    setUsuario(usuarioActualizado);
+  }
+
   return (
-    <AuthContext.Provider value={{ usuario, cargando, login, registro, logout }}>
+    <AuthContext.Provider value={{ usuario, cargando, login, registro, logout, actualizarUsuario }}>
       {children}
     </AuthContext.Provider>
   );

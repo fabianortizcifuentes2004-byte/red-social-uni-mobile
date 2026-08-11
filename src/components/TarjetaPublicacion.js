@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { resolverUrlImagen } from "../api/client";
 
 export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
   const esDocente = publicacion.rol_autor === "docente";
@@ -13,9 +14,13 @@ export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
       )}
 
       <View style={styles.encabezado}>
-        <View style={[styles.avatar, esDocente && styles.avatarDocente]}>
-          <Text style={styles.avatarInicial}>{publicacion.autor.charAt(0)}</Text>
-        </View>
+        {publicacion.foto_autor ? (
+          <Image source={{ uri: resolverUrlImagen(publicacion.foto_autor) }} style={styles.avatarImagen} />
+        ) : (
+          <View style={[styles.avatar, esDocente && styles.avatarDocente]}>
+            <Text style={styles.avatarInicial}>{publicacion.autor.charAt(0)}</Text>
+          </View>
+        )}
         <View>
           <Text style={styles.autor}>{publicacion.autor}</Text>
           <Text style={styles.rol}>{esDocente ? "Docente" : "Estudiante"}</Text>
@@ -23,6 +28,13 @@ export default function TarjetaPublicacion({ publicacion, onLike, onAbrir }) {
       </View>
 
       <Text style={styles.contenido}>{publicacion.contenido}</Text>
+
+      {publicacion.imagen_url && (
+        <Image
+          source={{ uri: resolverUrlImagen(publicacion.imagen_url) }}
+          style={styles.imagenPublicacion}
+        />
+      )}
 
       <View style={styles.pie}>
         <TouchableOpacity style={styles.accion} onPress={() => onLike(publicacion.id)}>
@@ -73,6 +85,18 @@ const styles = StyleSheet.create({
   },
   avatarDocente: {
     backgroundColor: "#F2984E",
+  },
+  avatarImagen: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginRight: 10,
+  },
+  imagenPublicacion: {
+    width: "100%",
+    height: 180,
+    borderRadius: 12,
+    marginBottom: 12,
   },
   avatarInicial: {
     color: "#FFFFFF",
