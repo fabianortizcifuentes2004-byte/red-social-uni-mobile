@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/client";
+import { registrarNotificaciones } from "../notifications/push";
 
 const AuthContext = createContext(null);
 
@@ -18,6 +19,7 @@ export function AuthProvider({ children }) {
       const usuarioGuardado = await AsyncStorage.getItem("usuario");
       if (token && usuarioGuardado) {
         setUsuario(JSON.parse(usuarioGuardado));
+        registrarNotificaciones();
       }
     } finally {
       setCargando(false);
@@ -29,6 +31,7 @@ export function AuthProvider({ children }) {
     await AsyncStorage.setItem("access_token", data.access_token);
     await AsyncStorage.setItem("usuario", JSON.stringify(data.usuario));
     setUsuario(data.usuario);
+    registrarNotificaciones();
   }
 
   async function registro(datos) {

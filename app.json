@@ -27,6 +27,13 @@
         {
           "photosPermission": "Se usa para elegir tu foto de perfil o adjuntar una imagen a tus publicaciones."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo-usanjose.jpg",
+          "color": "#4E5BF2"
+        }
       ]
     ]
   }

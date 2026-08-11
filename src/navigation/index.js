@@ -1,6 +1,11 @@
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { NavigationContainer, DarkTheme, DefaultTheme } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  DarkTheme,
+  DefaultTheme,
+  createNavigationContainerRef,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +22,8 @@ import PerfilScreen from "../screens/PerfilScreen";
 import PerfilUsuarioScreen from "../screens/PerfilUsuarioScreen";
 import AdminScreen from "../screens/AdminScreen";
 import UsuariosBloqueadosScreen from "../screens/UsuariosBloqueadosScreen";
+
+export const navigationRef = createNavigationContainerRef();
 
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
@@ -116,7 +123,7 @@ export default function Navegacion() {
   }
 
   return (
-    <NavigationContainer theme={temaNavegacion}>
+    <NavigationContainer ref={navigationRef} theme={temaNavegacion}>
       {usuario ? <PilaPrincipal /> : <PilaAutenticacion />}
     </NavigationContainer>
   );
