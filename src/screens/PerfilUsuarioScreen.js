@@ -14,6 +14,7 @@ export default function PerfilUsuarioScreen({ route, navigation }) {
   const [perfil, setPerfil] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [procesandoSeguir, setProcesandoSeguir] = useState(false);
+  const [procesandoBloqueo, setProcesandoBloqueo] = useState(false);
 
   const cargarPerfil = useCallback(async () => {
     try {
@@ -46,6 +47,32 @@ export default function PerfilUsuarioScreen({ route, navigation }) {
     } finally {
       setProcesandoSeguir(false);
     }
+  }
+
+  async function alternarBloqueo() {
+    const accion = perfil.lo_bloqueaste ? "Desbloquear" : "Bloquear";
+    Alert.alert(`${accion} usuario`, `¿Seguro que quieres ${accion.toLowerCase()} a ${perfil.nombre_completo}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: accion,
+        style: "destructive",
+        onPress: async () => {
+          setProcesandoBloqueo(true);
+          try {
+            if (perfil.lo_bloqueaste) {
+              await api.delete(`/users/${userId}/bloquear`);
+            } else {
+              await api.post(`/users/${userId}/bloquear`);
+            }
+            cargarPerfil();
+          } catch (error) {
+            Alert.alert("Error", "No se pudo actualizar el bloqueo");
+          } finally {
+            setProcesandoBloqueo(false);
+          }
+        },
+      },
+    ]);
   }
 
   if (cargando || !perfil) {
@@ -88,28 +115,37 @@ export default function PerfilUsuarioScreen({ route, navigation }) {
       </View>
 
       {!esUnoMismo && (
-        <View style={estilos.filaAcciones}>
-          <TouchableOpacity
-            style={[estilos.boton, perfil.lo_sigues && estilos.botonSecundario]}
-            onPress={alternarSeguir}
-            disabled={procesandoSeguir}
-          >
-            <Text style={estilos.botonTexto}>
-              {procesandoSeguir ? "..." : perfil.lo_sigues ? "Dejar de seguir" : "Seguir"}
+        <>
+          <View style={estilos.filaAcciones}>
+            <TouchableOpacity
+              style={[estilos.boton, perfil.lo_sigues && estilos.botonSecundario]}
+              onPress={alternarSeguir}
+              disabled={procesandoSeguir}
+            >
+              <Text style={estilos.botonTexto}>
+                {procesandoSeguir ? "..." : perfil.lo_sigues ? "Dejar de seguir" : "Seguir"}
+              </Text>
+            </TouchableOpacity>
+            {!perfil.lo_bloqueaste && (
+              <TouchableOpacity
+                style={[estilos.boton, estilos.botonSecundario]}
+                onPress={() =>
+                  navigation.navigate("Conversacion", {
+                    otroUsuarioId: perfil.id,
+                    nombreOtroUsuario: perfil.nombre_completo,
+                  })
+                }
+              >
+                <Text style={estilos.botonTexto}>Enviar mensaje</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <TouchableOpacity onPress={alternarBloqueo} disabled={procesandoBloqueo}>
+            <Text style={estilos.enlaceBloqueo}>
+              {procesandoBloqueo ? "..." : perfil.lo_bloqueaste ? "Desbloquear usuario" : "Bloquear usuario"}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[estilos.boton, estilos.botonSecundario]}
-            onPress={() =>
-              navigation.navigate("Conversacion", {
-                otroUsuarioId: perfil.id,
-                nombreOtroUsuario: perfil.nombre_completo,
-              })
-            }
-          >
-            <Text style={estilos.botonTexto}>Enviar mensaje</Text>
-          </TouchableOpacity>
-        </View>
+        </>
       )}
     </View>
   );
@@ -211,6 +247,11 @@ function crearEstilos(colores) {
       color: colores.texto,
       fontWeight: "600",
       fontSize: 14,
+    },
+    enlaceBloqueo: {
+      color: colores.peligro,
+      fontSize: 13,
+      marginTop: 16,
     },
   });
 }

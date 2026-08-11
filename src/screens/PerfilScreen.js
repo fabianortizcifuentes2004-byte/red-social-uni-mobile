@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import api, { resolverUrlImagen } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import ModalConfirmarPassword from "../components/ModalConfirmarPassword";
 
 const OPCIONES_APARIENCIA = [
   { valor: "sistema", etiqueta: "Sistema" },
@@ -12,7 +13,7 @@ const OPCIONES_APARIENCIA = [
   { valor: "claro", etiqueta: "Claro" },
 ];
 
-export default function PerfilScreen() {
+export default function PerfilScreen({ navigation }) {
   const { usuario, logout, actualizarUsuario } = useAuth();
   const { colores, preferencia, cambiarPreferencia } = useTheme();
   const estilos = crearEstilos(colores);
@@ -21,6 +22,7 @@ export default function PerfilScreen() {
   const [guardando, setGuardando] = useState(false);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [contadores, setContadores] = useState({ total_seguidores: 0, total_siguiendo: 0 });
+  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -71,6 +73,16 @@ export default function PerfilScreen() {
       Alert.alert("Error", "No se pudo actualizar la foto de perfil");
     } finally {
       setSubiendoFoto(false);
+    }
+  }
+
+  async function eliminarCuenta(password) {
+    try {
+      await api.delete("/users/me", { password });
+      setModalEliminarVisible(false);
+      await logout();
+    } catch (error) {
+      Alert.alert("Error", error.response?.data?.error || "No se pudo eliminar la cuenta");
     }
   }
 
@@ -136,9 +148,27 @@ export default function PerfilScreen() {
         ))}
       </View>
 
+      <TouchableOpacity onPress={() => navigation.navigate("UsuariosBloqueados")}>
+        <Text style={estilos.enlaceBloqueados}>Usuarios bloqueados</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={estilos.botonSalir} onPress={logout}>
         <Text style={estilos.botonSalirTexto}>Cerrar sesión</Text>
       </TouchableOpacity>
+
+      <View style={estilos.zonaPeligrosa}>
+        <TouchableOpacity onPress={() => setModalEliminarVisible(true)}>
+          <Text style={estilos.botonEliminarCuenta}>Eliminar mi cuenta</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ModalConfirmarPassword
+        visible={modalEliminarVisible}
+        titulo="Eliminar cuenta"
+        mensaje="Esta acción es irreversible. Ingresa tu contraseña para confirmar."
+        onCerrar={() => setModalEliminarVisible(false)}
+        onConfirmar={eliminarCuenta}
+      />
     </View>
   );
 }
@@ -264,12 +294,30 @@ function crearEstilos(colores) {
       fontSize: 13,
       fontWeight: "600",
     },
-    botonSalir: {
+    enlaceBloqueados: {
+      color: colores.acentoSecundario,
+      fontSize: 13,
       marginTop: 20,
+    },
+    botonSalir: {
+      marginTop: 16,
     },
     botonSalirTexto: {
       color: colores.peligro,
       fontSize: 14,
+    },
+    zonaPeligrosa: {
+      marginTop: 32,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: colores.borde,
+      width: "100%",
+      alignItems: "center",
+    },
+    botonEliminarCuenta: {
+      color: colores.peligro,
+      fontSize: 13,
+      opacity: 0.8,
     },
   });
 }

@@ -16,6 +16,7 @@ import ConversacionScreen from "../screens/ConversacionScreen";
 import PerfilScreen from "../screens/PerfilScreen";
 import PerfilUsuarioScreen from "../screens/PerfilUsuarioScreen";
 import AdminScreen from "../screens/AdminScreen";
+import UsuariosBloqueadosScreen from "../screens/UsuariosBloqueadosScreen";
 
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
@@ -81,6 +82,11 @@ function PilaPrincipal() {
         name="PerfilUsuario"
         component={PerfilUsuarioScreen}
         options={{ title: "Perfil" }}
+      />
+      <MainStack.Screen
+        name="UsuariosBloqueados"
+        component={UsuariosBloqueadosScreen}
+        options={{ title: "Usuarios bloqueados" }}
       />
     </MainStack.Navigator>
   );

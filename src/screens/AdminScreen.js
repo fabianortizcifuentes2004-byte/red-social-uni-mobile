@@ -14,22 +14,34 @@ export default function AdminScreen() {
 
   const [estadisticas, setEstadisticas] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
+  const [reportes, setReportes] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   const cargar = useCallback(async () => {
     try {
-      const [stats, lista] = await Promise.all([
+      const [stats, lista, listaReportes] = await Promise.all([
         api.get("/admin/estadisticas"),
         api.get("/admin/usuarios"),
+        api.get("/admin/reportes", { params: { resuelto: "false" } }),
       ]);
       setEstadisticas(stats.data);
       setUsuarios(lista.data);
+      setReportes(listaReportes.data);
     } catch (error) {
       Alert.alert("Error", "No se pudo cargar el panel de administración");
     } finally {
       setCargando(false);
     }
   }, []);
+
+  async function marcarResuelto(reporteId) {
+    try {
+      await api.put(`/admin/reportes/${reporteId}`, { resuelto: true });
+      cargar();
+    } catch (error) {
+      Alert.alert("Error", "No se pudo actualizar el reporte");
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -83,6 +95,30 @@ export default function AdminScreen() {
                 </View>
               ))}
             </View>
+
+            <Text style={estilos.subtitulo}>Reportes pendientes ({reportes.length})</Text>
+            {reportes.length === 0 ? (
+              <Text style={estilos.sinReportes}>No hay reportes pendientes</Text>
+            ) : (
+              reportes.map((reporte) => (
+                <View key={reporte.id} style={estilos.filaReporte}>
+                  <View style={estilos.info}>
+                    <Text style={estilos.nombre}>
+                      {reporte.tipo_objetivo === "publicacion" ? "Publicación" : "Comentario"} #
+                      {reporte.objetivo_id}
+                    </Text>
+                    <Text style={estilos.correo}>
+                      Reportado por {reporte.reportante}
+                      {reporte.motivo ? ` · ${reporte.motivo}` : ""}
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={estilos.botonResolver} onPress={() => marcarResuelto(reporte.id)}>
+                    <Text style={estilos.botonActivoTexto}>Marcar resuelto</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+
             <Text style={estilos.subtitulo}>Usuarios</Text>
           </>
         }
@@ -228,6 +264,27 @@ function crearEstilos(colores) {
       color: colores.textoSecundario,
       textAlign: "center",
       marginTop: 30,
+    },
+    sinReportes: {
+      color: colores.textoSecundario,
+      fontSize: 13,
+      marginBottom: 20,
+    },
+    filaReporte: {
+      backgroundColor: colores.superficie,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+    },
+    botonResolver: {
+      backgroundColor: colores.acento,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
     },
   });
 }
