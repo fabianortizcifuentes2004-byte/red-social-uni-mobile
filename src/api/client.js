@@ -68,10 +68,13 @@ async function subirImagen(archivo) {
   return data; // { url }
 }
 
-// Resuelve una URL relativa (p.ej. "/api/uploads/xxx.jpg") a una URL absoluta usable en <Image>.
-export function resolverUrlImagen(urlRelativa) {
-  if (!urlRelativa) return null;
-  return `${API_ORIGIN}${urlRelativa}`;
+// Resuelve una URL de imagen a una URL absoluta usable en <Image>. Acepta
+// tanto rutas relativas del backend ("/api/uploads/xxx.jpg", disco local)
+// como URLs absolutas ya completas (p.ej. Cloudinary), que se devuelven tal cual.
+export function resolverUrlImagen(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_ORIGIN}${url}`;
 }
 
 // Interfaz compatible con axios (api.get/post/put) para no tener que
