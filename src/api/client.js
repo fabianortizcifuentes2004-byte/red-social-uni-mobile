@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Cambia esto por la IP/dominio donde corra tu backend Flask.
-// En desarrollo con Expo Go, usa la IP local de tu computador (no "localhost").
-export const API_URL = "http://192.168.1.100:5000/api";
+// Se define en `.env` (ver `.env.example`). En desarrollo con Expo Go, usa la
+// IP local de tu computador (no "localhost", tu celular no la reconoce).
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.100:5000/api";
 
 async function request(method, path, body, params) {
   const token = await AsyncStorage.getItem("access_token");
